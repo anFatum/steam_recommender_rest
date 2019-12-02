@@ -3,14 +3,14 @@ from django.db import models
 
 # Create your models here.
 class SteamUser(models.Model):
-    user_id = models.IntegerField()
+    user_id = models.IntegerField(unique=True)
 
     def __str__(self):
         return f"{self.user_id}"
 
 
 class SteamGame(models.Model):
-    game_id = models.IntegerField()
+    game_id = models.IntegerField(unique=True)
 
     def __str__(self):
         return f"{self.game_id}"
@@ -30,3 +30,4 @@ class Ownership(models.Model):
             'game',
             'time_played'
         )
+        ordering = ['time_played']
