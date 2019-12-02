@@ -1,5 +1,5 @@
 """
-WSGI config for steam_recommend project.
+WSGI config for steam_recommend_rest project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'steam_recommend.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'steam_recommend_rest.settings')
 
 application = get_wsgi_application()
