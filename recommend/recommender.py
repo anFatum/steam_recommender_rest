@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Optional
 import pandas as pd
 from recommend.models import Ownership, SteamUser, SteamGame
@@ -9,9 +7,9 @@ from sklearn.neighbors import NearestNeighbors
 
 
 class DataMeta(type):
-    _instance: Optional[Recommender] = None
+    _instance = None
 
-    def __call__(cls) -> Recommender:
+    def __call__(cls):
         if cls._instance is None:
             cls._instance = super(DataMeta, cls).__call__()
         return cls._instance
@@ -36,7 +34,7 @@ class Recommender(metaclass=DataMeta):
     _data: pd.DataFrame = None
 
     def __init__(self):
-        self._data = self.process_data(get_data())
+        self.update_data()
 
     def predict_game(self, game_id):
         game_features, game_features_matrix = self.get_features_matrix(index='game_id', columns='user_id')
@@ -53,9 +51,20 @@ class Recommender(metaclass=DataMeta):
         result = []
         for game_id in games_id:
             result.extend(self.predict_game(game_id))
-        result = sorted(result, key=lambda x: x['prob'])[:5]
+        # TODO: add unique here
+        result = sorted(result, key=lambda x: x['prob'])
         predicted = list(map(lambda x: x['game_id'], result))
         return predicted
+
+    def predict_games_for_user(self, games_id, user_id):
+        result = self.predict_games(games_id)
+        owned_games = self._data.loc[self._data['user_id'] == user_id, 'game_id']
+        predicted = []
+        for game in result:
+            if (owned_games == game).any():
+                continue
+            predicted.append(game)
+        return predicted[:min(len(predicted), 5)]
 
     # def predict_user(self, user_id):
     #     game_features, game_features_matrix = self.get_features_matrix(index='user_id', columns='game_title')
@@ -127,3 +136,6 @@ class Recommender(metaclass=DataMeta):
         data.loc[:, ['ratings']] = data['time_played'].map(convert_data_to_rating)
 
         return data
+
+    def update_data(self):
+        self._data = self.process_data(get_data())
